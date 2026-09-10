@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+.DS_Store
+.env
+.env.local
+.gradle-user-home/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+backend/target/
+backend/.gradle/
+backend/build/
+backend/.m2/
