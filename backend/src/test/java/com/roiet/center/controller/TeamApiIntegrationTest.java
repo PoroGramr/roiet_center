@@ -17,4 +17,5 @@ class TeamApiIntegrationTest {
   mvc.perform(get("/api/teams")).andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value("새 팀"));
  }
  @Test void requiresAuthentication() throws Exception {mvc.perform(get("/api/teams")).andExpect(status().isUnauthorized());}
+ @Test @WithMockUser(roles="TEACHER") void teacherCannotCreateTeam() throws Exception {mvc.perform(post("/api/teams").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"권한 없는 팀\"}")).andExpect(status().isForbidden());}
 }

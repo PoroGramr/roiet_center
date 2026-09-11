@@ -5,6 +5,8 @@ import java.util.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 public interface TeamMemberRepository extends JpaRepository<TeamMember,Long> {
+ interface TeamSize { Long getTeamId(); long getCount(); }
+ @Query("select tm.team.id as teamId,count(tm) as count from TeamMember tm where tm.endedAt is null group by tm.team.id") List<TeamSize> countCurrentByTeam();
  @Query("select tm from TeamMember tm join fetch tm.student where tm.team.id=:teamId and tm.startedAt<=:date and (tm.endedAt is null or tm.endedAt>=:date) order by tm.student.name")
  List<TeamMember> findMembersOn(@Param("teamId") Long teamId,@Param("date") LocalDate date);
  @Query("select tm from TeamMember tm join fetch tm.team where tm.student.id=:studentId and tm.endedAt is null") Optional<TeamMember> findCurrent(@Param("studentId") Long studentId);

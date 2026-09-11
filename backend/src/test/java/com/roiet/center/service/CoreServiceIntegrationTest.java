@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest @Transactional
 class CoreServiceIntegrationTest {
- @Autowired TeamService teamService; @Autowired StudentService studentService; @Autowired SessionService sessionService;
+ @Autowired TeamService teamService; @Autowired StudentService studentService; @Autowired SessionService sessionService; @Autowired UserService userService;
  @Autowired StatisticsService statisticsService; @Autowired DashboardService dashboardService; @Autowired TeamMemberRepository memberships; @Autowired JdbcTemplate jdbc;
  Long userId;
  @BeforeEach void user(){jdbc.update("insert into users(email,password,name,role,created_at,updated_at) values(?,?,?,?,current_timestamp,current_timestamp)","test@example.com","x","테스트 교사","TEACHER");userId=jdbc.queryForObject("select id from users where email='test@example.com'",Long.class);}
@@ -66,9 +66,20 @@ class CoreServiceIntegrationTest {
   assertThat(dashboardService.get().alerts()).anySatisfy(alert->{assertThat(alert.studentId()).isEqualTo(s.id());assertThat(alert.code()).isEqualTo("CONSECUTIVE_ABSENCE");});
  }
 
+ @Test void listsTeachersAndAssignsTeacherAsManager(){
+  var team=teamService.create(new TeamDtos.SaveRequest("교사 배정 팀",null,userId));
+  assertThat(team.managerName()).isEqualTo("테스트 교사");
+  assertThat(userService.teachers()).singleElement().satisfies(teacher->{assertThat(teacher.id()).isEqualTo(userId);assertThat(teacher.role()).isEqualTo("TEACHER");});
+ }
+
+ @Test void rejectsAdminAsTeamManager(){
+  jdbc.update("insert into users(email,password,name,role,created_at,updated_at) values(?,?,?,?,current_timestamp,current_timestamp)","admin-test@example.com","x","테스트 관리자","ADMIN");
+  Long adminId=jdbc.queryForObject("select id from users where email='admin-test@example.com'",Long.class);
+  assertThatThrownBy(()->teamService.create(new TeamDtos.SaveRequest("잘못된 담당자 팀",null,adminId))).isInstanceOf(BusinessException.class).hasMessageContaining("담당 교사");
+ }
+
  private TeamDtos.Summary team(String name){return teamService.create(new TeamDtos.SaveRequest(name,null,null));}
  private StudentDtos.Summary student(String name,Long team,LocalDate start){return studentService.create(new StudentDtos.SaveRequest(name,"010-0000-0000",Student.Status.ACTIVE,null,team,start));}
  private AttendanceDtos.Input input(Long id,Attendance.Status status){return new AttendanceDtos.Input(id,status,null);}
  private SessionDtos.CreateRequest session(Long team,LocalDate date,List<AttendanceDtos.Input> rows){return new SessionDtos.CreateRequest(team,date,null,null,null,"수업 내용",null,rows);}
 }
-

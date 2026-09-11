@@ -5,7 +5,8 @@ import java.util.List;
 public final class TeamDtos {
  private TeamDtos(){}
  public record SaveRequest(@NotBlank @Size(max=80) String name,@Size(max=1000) String description,Long managerId){}
- public record Summary(Long id,String name,String description,Long managerId,String managerName,long currentStudentCount,LocalDate recentSessionDate){}
+ public record Summary(Long id,String name,String description,Long managerId,String managerName,long currentStudentCount,LocalDate recentSessionDate,Double recentAttendanceRate){
+  public Summary(Long id,String name,String description,Long managerId,String managerName,long currentStudentCount,LocalDate recentSessionDate){this(id,name,description,managerId,managerName,currentStudentCount,recentSessionDate,null);}
+ }
  public record Detail(Summary team,List<StudentDtos.Summary> students,List<SessionDtos.Summary> sessions,double attendanceRate){}
 }
-
