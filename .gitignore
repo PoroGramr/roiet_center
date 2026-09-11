@@ -2,7 +2,11 @@
 .vscode/
 .DS_Store
 .env
+.env.*
+!.env.example
 .env.local
+data/
+.credentials
 .gradle-user-home/
 frontend/node_modules/
 frontend/.next/
